@@ -1,6 +1,6 @@
 <!-- Begin Copy Calendar -->
 <script type="text/template" id="copy-calendar-template">
-    <tr class="~[evenoddrow]">
+    <tr>
         <td><a href="/admin/schoolsetup/calendarsetup/calcopy.html">Copy Calendar</a></td>
         <td>Copy calendar setup from source school to current school. Includes Auto-Fill Day feature.</td>
     </tr>
@@ -9,8 +9,19 @@
 <script>
     (function () {
         var template = $j($j('#copy-calendar-template').html());
-        var insertionSelect = $j('a[href="/admin/schoolsetup/calendarsetup/calendarsetup.html"]');
-        template.insertAfter(insertionSelect)
+        var insertionSelect = $j('a[href="/admin/schoolsetup/calendarsetup/calendarsetup.html"]').parent().parent();
+        template.insertAfter(insertionSelect);
+
+        var table = $j('table').eq(0);
+        var emptyTrs = table.find('tr:not(".headerRow")').filter(function(index, element) {
+            if ($j(element).find('td').length === 1) {
+                return element;
+            }
+        });
+        var oddTrs = table.find('tr:not(".headerRow"):odd').not(emptyTrs);
+        var evenTrs = table.find('tr:not(".headerRow"):even').not(emptyTrs);
+        oddTrs.removeClass('oddRow').removeClass('evenRow').addClass('evenRow');
+        evenTrs.removeClass('oddRow').removeClass('evenRow').addClass('oddRow');
     }());
 </script>
 <!-- End Copy Calendar -->
