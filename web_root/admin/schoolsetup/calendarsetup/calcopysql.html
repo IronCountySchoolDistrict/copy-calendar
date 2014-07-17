@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<!-- non framed -->
+<head>
+<title>Calendar Setup - ~(yearname)</title>
+~[wc:commonscripts]
+<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+<link href="/images/css/print.css" rel="stylesheet" media="print">
+<script type="text/javascript" src="/scripts/yui/2.6.0/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript">
+//populates all bell drop downs with all of your bell schedules
+function popBells() {
+	var e = YAHOO.util.Dom.getElementsByClassName('Bells', 'select');
+	var y;
+	var f='';
+	for(var a=0;a<e.length;a++){
+		f = e[a].id;
+		~[tlist_sql;SELECT bs.Name, bs.ID
+		FROM Bell_Schedule bs
+		WHERE bs.SchoolID=~(curschoolid) AND bs.Year_ID=~(curyearid)
+		ORDER BY bs.Name]
+		y = new Option("~(bs.Name;t)","~(bs.ID;l)");
+		document.getElementById(f).options[~(count;-)] = y;
+		[/tlist_sql]
+	}
+}
+//populates all Day drop downs with all of your Day names
+function popDays() {
+	var d = YAHOO.util.Dom.getElementsByClassName('Days', 'select');
+	var x;
+	var c='';
+	for(var z=0;z<d.length;z++){
+		c = d[z].id;
+		~[tlist_sql;SELECT Day_Name, ID FROM Cycle_Day
+		WHERE SchoolID=~(curschoolid) AND Year_ID=~(curyearid)
+		ORDER BY SortOrder]
+		x = new Option("~(Day_Name;t)","~(ID;l)");
+		document.getElementById(c).options[~(count;-)] = x;
+		[/tlist_sql]
+	}
+}
+//Copies lookupid value into all of the dropdowns with the class1 passed class name.  toClear used to pass the class name of the element to reset
+function copyInfo(class1, lookupid, toclear) {
+	var s1 = YAHOO.util.Dom.getElementsByClassName(class1, 'select');
+	if(toclear!=""){ClearInfo(toclear);}
+	for(var z=0;z<s1.length;z++) {
+		document.getElementById(s1[z].id).value = lookupid;
+	}
+}
+// function used to reset the maping vs autofill so that when you select one, the other is cleared.
+function ClearInfo(class1){
+	var s1 = YAHOO.util.Dom.getElementsByClassName(class1, 'select');
+	for(var z=0;z<s1.length;z++) {
+		document.getElementById(s1[z].id).value = "";
+	}
+}
+// used for the auto-fill day rotation function so that the insession days are filled in the cycle's order.
+function FillInfo(lookupid) {
+	var f1 = YAHOO.util.Dom.getElementsByClassName('Day', 'select');
+	var f2 = YAHOO.util.Dom.getElementsByClassName('Fill');
+	var di = document.forms['calendar'].DayFill.options.length - 1;
+	ClearInfo('Clean1');
+	var i=0
+	if(lookupid == ""){copyInfo('Day', lookupid);}
+	else
+	{
+		while(i<di)
+		{
+		if(lookupid == document.forms['calendar'].DayFill.options[i+1].value){break;}
+		i++;
+		}
+		for(var z=0;z<f1.length;z++) {
+			if (f2[z].checked)
+			{
+			document.getElementById(f1[z].id).value = document.forms['calendar'].DayFill.options[(i%di)+1].value;
+			i++;
+			}
+		}
+	}
+}
+// used for the auto-fill bell schedule so that the insession days are filled with the chosen schedule.
+function FillBell(lookupid) {
+	var b1 = YAHOO.util.Dom.getElementsByClassName('Bell', 'select');
+	var b2 = YAHOO.util.Dom.getElementsByClassName('Fill');
+	var di = document.forms['calendar'].DayFill.options.length - 1;
+	ClearInfo('CleanB1');
+	var i=0
+	if(lookupid == ""){copyInfo('Bell', lookupid);}
+	else
+	{
+		while(i<di)
+		{
+		if(lookupid == document.forms['calendar'].BellFill.options[i+1].value){break;}
+		i++;
+		}
+		for(var z=0;z<b1.length;z++) {
+			if (b2[z].checked)
+			{
+			document.getElementById(b1[z].id).value = lookupid;
+			i++;
+			}
+		}
+	}
+}
+
+YAHOO.util.Event.onDOMReady(popBells);
+YAHOO.util.Event.onDOMReady(popDays);
+
+</script>
+</head>
+
+<body>
+
+
+~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; <a href="/admin/schoolsetup/home.html" target="_top">School Setup</a> &gt; Calendar Setup - ~(yearname)<!-- breadcrumb end -->~[wc:admin_navigation_css]
+<form name="calendar" action="/admin/changesrecorded.white_nf.html" method="POST">
+<!-- start of title -->
+<h1>Calendar Setup - ~(yearname)</h1>
+
+<!-- end of title -->
+
+<!-- start of content and bounding box -->
+<div class="box-round">
+<table><tr><td>
+<table border="0" cellspacing="0" cellpadding="4">
+<tr>
+	<td class="bold">Source School Days</td>
+	<td class="bold">~(schoolname) School Days</td>
+</tr>
+~[tlist_sql;SELECT Day_Name, ID FROM Cycle_Day
+WHERE SchoolID=~[gpv:schooltocopy] AND Year_ID=~(curyearid)
+ORDER BY SortOrder]<tr>
+	<td align="right">~(Day_Name;t) --> </td>
+	<td><select class="Days Clean1" id="DayChange~(count;-)" onChange="copyInfo('Day ~(ID;l)', this.value, 'Clean2');" ><option value="" ></select></td>
+</tr>
+[/tlist_sql]
+<tr><td colspan="2" align="center"><hr><b>Auto-Fill Day Rotation for In-Session Days</b></td></tr>
+<tr><td align="right">Start With --> </td><td><select class="Days Clean2" id="DayFill" onChange="FillInfo(this.value);"><option value=""></select></td></tr>
+</table>
+</td><td align="right" valign="top">
+<table border="0" cellspacing="0" cellpadding="4">
+<tr>
+	<td class="bold">Source School Bell Schedule</td>
+	<td class="bold">~(schoolname) Bell Schedule</td>
+</tr>
+~[tlist_sql;SELECT bs.Name, bs.ID
+FROM Bell_Schedule bs
+WHERE bs.SchoolID=~[gpv:schooltocopy] AND bs.Year_ID=~(curyearid)
+ORDER BY bs.Name]
+<tr>
+	<td align="right">~(bs.Name;) --> </td>
+	<td><select class="Bells CleanB1" id="BellChange~(count;-)" onChange="copyInfo('Bell~(bs.ID;l)', this.value, 'CleanB2');" ><option value="" ></select></td>
+</tr>
+[/tlist_sql]
+<tr><td colspan="2" align="center"><hr><b>Auto-Fill Bell Schedule for In-Session Days</b></td></tr>
+<tr><td align="right">Start With --> </td><td><select class="Bells CleanB2" id="BellFill" onChange="FillBell(this.value);" ><option value="" ></select></td></tr>
+</table>
+</td></tr></table>
+
+<table border="0" cellspacing="0" cellpadding="4">
+<tr bgcolor="#f6f6f6">
+</tr>
+<tr align="center" bgcolor="#f6f6f6">
+<td  class="bold">Date</td>
+<td colspan="2" class="bold">Day</td>
+<td colspan="2" class="bold">Schedule</td>
+<td  class="bold">In<br>Sess</td>
+<td  class="bold">Memb<br>Value</td>
+<td  align="left" class="bold">Type</td>
+<td  align="left" class="bold">Note</td>
+</tr>
+<tr align="center" bgcolor="#f6f6f6">
+</tr>
+~[tlist_sql;SELECT to_char(cd.date_value,'dd Mon, yy') DateValue, 
+	to_char(cd.date_value,'yymmdd') Date2,
+    MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN cyd.Day_Name ELSE NULL END) DayName2,
+	MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN cd.Cycle_Day_ID ELSE NULL END) DayID2, 
+    MAX(CASE WHEN cd.SchoolID=~(curschoolid) THEN cd.DCID ELSE NULL END) DCID1,  
+    MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN bs.Name ELSE NULL END) BellName2,
+    MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN cd.Bell_Schedule_ID ELSE NULL END) BellID2,
+    MAX(CASE WHEN cd.InSession=1 AND cd.SchoolID=~[gpv:schooltocopy] THEN 'checked' ELSE NULL END) InSessionCheck, 
+    MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN cd.MembershipValue ELSE NULL END) Mem2,
+    MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN cd.Type ELSE NULL END) Type2,
+    MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN g.Name ELSE NULL END) Name2,
+    MAX(CASE WHEN cd.SchoolID=~[gpv:schooltocopy] THEN cd.Note ELSE NULL END) Note2
+
+FROM Calendar_Day cd 
+INNER JOIN Schools sch
+ON cd.SchoolID=sch.School_Number
+LEFT OUTER JOIN Cycle_Day cyd
+ON cd.Cycle_Day_ID=cyd.ID
+LEFT OUTER JOIN Bell_Schedule bs
+ON cd.Bell_Schedule_ID=bs.ID
+LEFT OUTER JOIN Gen g
+ON cd.Type=g.Value AND g.cat='dailymembtypes'
+WHERE to_char(cd.date_value,'yyyy-mm-dd')>='~[gpv:startingDay]' AND to_char(cd.date_value,'yyyy-mm-dd')<='~[gpv:endingDay]' AND cd.SchoolID IN (~(curschoolid),~[gpv:schooltocopy])
+GROUP BY cd.date_value
+ORDER BY cd.date_value
+;alternatecolor]<tr>
+
+<td class="bold">~(DateValue;t)</td>
+
+<td><span id="DayValue~(Date2;t)">~(DayName2;t) </span></td>
+
+<td><select class="Day ~(DayID2;l) Days" id="Day~(Date2;t)" name="UF-051015~(DCID1;l)" ><option value="" ></select></td>
+
+<td><span id="BellValue~(Date2;t)">~(BellName2;t) </span></td>
+
+<td><select class="Bell~(BellID2;l) Bells Bell" id="Bell~(Date2;t)" name="UF-051016~(DCID1;l)" ><option value="" ></select></td>
+
+<td><input type="hidden" name="UF-051011~(DCID1;l)" value="" /><input class="Fill" type="checkbox" name="UF-051011~(DCID1;l)" value="1" ~(InSessionCheck) /></td>
+
+<td><input type="text" name="UF-051012~(DCID1;l)" value="~(Mem2;r)" size="3" /></td>
+
+<td><input type="hidden" name="UF-051014~(DCID1;l)" value="~(Type2;t)" />~(Name2;t) </td>
+
+<td><input type="text" name="UF-051013~(DCID1;l)" value="~(Note2;t)" size="24" /></td>
+
+</tr>
+[/tlist_sql]
+<tr>
+<td colspan="13" align="center" valign="top"><a href="/admin/schoolsetup/calendarsetup/schooldays.html">Verify # of school days in the current term</a>.</td>
+</tr>
+</table>
+<br>
+
+<div class="button-row">
+<input type="hidden" name="ac" value="prim" />
+~[submitbutton]
+</div>
+
+</div>
+<br>
+<!-- end of content of bounding box -->
+</form>
+~[wc:admin_footer_css]
+
+
+</body>
+</html>

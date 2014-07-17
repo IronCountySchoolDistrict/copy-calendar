@@ -1,0 +1,16 @@
+<!-- Begin Copy Calendar -->
+<script type="text/template" id="copy-calendar-template">
+    <tr class="~[evenoddrow]">
+        <td><a href="/admin/schoolsetup/calendarsetup/calcopy.html">Copy Calendar</a></td>
+        <td>Copy calendar setup from source school to current school. Includes Auto-Fill Day feature.</td>
+    </tr>
+</script>
+
+<script>
+    (function () {
+        var template = $j($j('#copy-calendar-template').html());
+        var insertionSelect = $j('a[href="/admin/schoolsetup/calendarsetup/calendarsetup.html"]');
+        template.insertAfter(insertionSelect)
+    }());
+</script>
+<!-- End Copy Calendar -->

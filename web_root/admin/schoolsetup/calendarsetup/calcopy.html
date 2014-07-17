@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<!-- non framed -->
+<head>
+<title>Calendar Copy</title>
+
+<script>
+
+sdate = "~[tlist_sql;SELECT to_char(FirstDay,'yyyy-mm-dd') FROM Terms
+WHERE YearID=~(curyearid) AND SchoolID=~(curschoolid) AND IsYearRec=1]~(FirstDay)[/tlist_sql]";
+edate = "~[tlist_sql;SELECT to_char(LastDay,'yyyy-mm-dd') FROM Terms
+WHERE YearID=~(curyearid) AND SchoolID=~(curschoolid) AND IsYearRec=1]~(LastDay)[/tlist_sql]";
+
+function checkDatesDB(vDate)
+{
+
+	// Checks for the following valid date formats, alerts user of error: 
+	// YYYY-MM-DD 
+	// Also separates date into month, day, and year variables 
+	var datePat = /^(\d{4})-(\d{2})-(\d{2})$/; 
+	dateStr = document.forms[0].elements[vDate].value;
+	
+	var matchArray = dateStr.match(datePat); // is the format ok? 
+	
+	if (matchArray == null) { 
+		alert("Date format must be yyyy-mm-dd.");
+		return false; 
+	} 
+	month = matchArray[2]; // parse date into variables 
+	day = matchArray[3]; 
+	year = matchArray[1]; 
+	if (month > 12) { // check month range 
+		alert("Month must be between 1 and 12."); 
+		return false; 
+	} 
+	if (day > 31) {
+		alert("Day must be between 1 and 31."); 
+		return false; 
+	} 
+	if ((month==4 || month==6 || month==9 || month==11) && day==31) {
+		alert("Month "+month+" doesn't have 31 days.");
+		return false;
+	} 
+	if (month == 2) { // check for february 29th 
+		var isleap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)); 
+		if (day>29 || (day==29 && !isleap)) { 
+			alert("February " + year + " doesn't have " + day + " days.");
+			return false; 
+		} 
+	} 
+	
+	if (!(dateStr >= sdate && dateStr <= edate)) {
+	alert("Date is outside of the valid date range for the year.");
+		return false;
+	}
+	return true; // date is valid 
+}
+	
+function dateValid(vDate)
+{
+
+	//Function used to stop the submit process. Returns TRUE if it is a valid date.
+	var datePat = /^(\d{4})-(\d{2})-(\d{2})$/; 
+	dateStr = document.forms[0].elements[vDate].value;
+	var matchArray = dateStr.match(datePat); // is the format ok? 
+	if (matchArray == null) {return false;} 
+	month = matchArray[2]; // parse date into variables 
+	day = matchArray[3]; 
+	year = matchArray[1]; 
+	if (month > 12 || day > 31 || ((month==4 || month==6 || month==9 || month==11) && day==31) || !(dateStr >= sdate && dateStr <= edate)) {return false;} 
+	if (month == 2) { // check for february 29th 
+		var isleap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)); 
+		if (day>29 || (day==29 && !isleap)) {return false;} 
+	} 
+	return true; // date is valid 
+}
+
+function actionSubmit(vDate1, vDate2) {
+if(dateValid(vDate1) && dateValid(vDate2)){
+	document.calcopy.action = 'calcopysql.html?schooltocopy=' + document.calcopy.Schoolid.value + '&startingDay=' + document.calcopy.startingDay.value + '&endingDay=' + document.calcopy.endingDay.value;
+	}
+else{
+	alert("One of your dates is invalid, please correct. \nDate format should match mm-dd-yyyy and fall between " + sdate + " and " + edate + ".");
+	return false;}
+}
+</script>
+
+~[wc:commonscripts]
+<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+<link href="/images/css/print.css" rel="stylesheet" media="print">
+</head>
+
+<body>
+
+~[wc:admin_header_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">Start Page</a> &gt; Calendar Copy Start<!-- breadcrumb end -->~[wc:admin_navigation_css]
+
+<form name="calcopy" id="calcopy" method="POST" onSubmit="return actionSubmit('startingDay','endingDay');">
+
+<!-- start of title -->
+<h1>Calendar Copy</h1>
+
+<div class="box-round">
+
+<table border="0" cellspacing="0" cellpadding="4">
+<tr>
+<td class="bold">School to copy from:</td>
+<td>
+
+~[x:schoolpopup]
+
+</td>
+</tr>
+</table>
+
+</div>
+<div class="box-round">
+<table>
+
+<tr><td align="right"><b>Start Date --></b> </td><td><input name="startingDay" type="text" size="9" id="startingDay" onChange="checkDatesDB('startingDay');"></td></tr>
+<tr><td align="right"><b>End Date --></b> </td><td><input name="endingDay" type="text" size="9" id="endingDay" onChange="checkDatesDB('endingDay');"></td></tr>
+</table></td></tr>
+<script>
+document.getElementById('startingDay').value = sdate;
+document.getElementById('endingDay').value = edate;
+</script>
+</table>
+<div class="button-row">
+~[submitbutton]
+</div>
+</div>
+<br>
+<!-- end of content of bounding box -->
+</form>
+
+~[wc:admin_footer_css]
+
+</body>
+</html>
