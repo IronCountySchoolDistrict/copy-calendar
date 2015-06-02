@@ -1,0 +1,19 @@
+{
+  "name": "copy-calendar",
+  "version": "1.0.0",
+  "description": "Copy Calendar allows you to copy the calendar to your currently selected school from another of your choosing",
+  "main": "",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IronCountySchoolDistrict/copy-calendar.git"
+  },
+  "author": "IronCountySchoolDistrict",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/IronCountySchoolDistrict/copy-calendar/issues"
+  },
+  "homepage": "https://github.com/IronCountySchoolDistrict/copy-calendar#readme"
+}
