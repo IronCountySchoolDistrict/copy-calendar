@@ -6,10 +6,8 @@
 
 <script>
 
-sdate = "~[tlist_sql;SELECT to_char(FirstDay,'yyyy-mm-dd') FROM Terms
-WHERE YearID=~(curyearid) AND SchoolID=~(curschoolid) AND IsYearRec=1]~(FirstDay)[/tlist_sql]";
-edate = "~[tlist_sql;SELECT to_char(LastDay,'yyyy-mm-dd') FROM Terms
-WHERE YearID=~(curyearid) AND SchoolID=~(curschoolid) AND IsYearRec=1]~(LastDay)[/tlist_sql]";
+var sdate = "~[tlist_sql;SELECT to_char(FirstDay,'yyyy-mm-dd') FROM Terms WHERE YearID=~(curyearid) AND SchoolID=~(curschoolid) AND IsYearRec=1]~(FirstDay)[/tlist_sql]";
+var edate = "~[tlist_sql;SELECT to_char(LastDay,'yyyy-mm-dd') FROM Terms WHERE YearID=~(curyearid) AND SchoolID=~(curschoolid) AND IsYearRec=1]~(LastDay)[/tlist_sql]";
 
 function checkDatesDB(vDate)
 {
